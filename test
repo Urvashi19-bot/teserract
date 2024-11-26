@@ -1,0 +1,56 @@
+import PyPDF2
+from pdf2image import convert_from_path
+import pytesseract
+from PIL import Image
+import os
+
+# Path to the PDF file
+pdf_path = "C:/Users/SS445519/OneDrive - Aditya Birla Capital/Documents/ABFSSL/EMD/ifrs-example-financial-statements-2021_2.pdf"
+
+# Path to the Tesseract executable
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path
+
+def extract_text_from_pdf(pdf_path):
+    
+  # Create a PDF file reader object
+    pdf_reader = PyPDF2.PdfReader(pdf_path)
+    text = ""
+
+  # Extract text from each page
+    for page in pdf_reader.pages:
+        text += page.extract_text() or ""
+
+    return text
+
+def extract_text_from_images(pdf_path):
+  # Convert PDF to images
+    images = convert_from_path(pdf_path)
+    text = ""
+
+  # Perform OCR on each image
+    for image in images:
+        text += pytesseract.image_to_string(image)
+
+    return text
+
+def main():
+  # Extract text from PDF
+    text_from_pdf = extract_text_from_pdf(pdf_path)
+    output_text = ""
+
+    if text_from_pdf.strip():
+        print("Text extracted from PDF using PyPDF2:")
+        output_text = text_from_pdf
+    else:
+        print("No text found using PyPDF2, trying OCR...")
+        text_from_images = extract_text_from_images(pdf_path)
+        output_text = text_from_images
+
+  # Save the extracted text to a text file
+    with open("extracted_text.txt", "w", encoding="utf-8") as file:
+        file.write(output_text)
+
+    print("Text has been saved to extracted_text.txt")
+
+if __name__ == "__main__":
+    main()
